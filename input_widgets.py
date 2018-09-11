@@ -4,7 +4,7 @@ Currently contains:
 - Entry for dates
 """
 import tkinter as tk
-from datetime import date
+import datetime
 
 
 class DateEntry(tk.Frame):
@@ -14,38 +14,79 @@ class DateEntry(tk.Frame):
 	def __init__(self, parent):
 		tk.Frame.__init__(self, parent)
 
-		# create variables for tracking entry
-		self.day = tk.StringVar(self)
-		self.month = tk.StringVar(self)
-		self.year = tk.StringVar(self)
+		# register validation command
+		id = parent.register(self.validate_entry)
 
 		# create entry boxes
-		day_box = tk.Entry(self, textvariable=self.day)
-		month_box = tk.Entry(self, textvariable=self.month)
-		year_box = tk.Entry(self, textvariable=self.year)
+		self.day = tk.Entry(self, width=3, justify='center', validate='key', validatecommand=(id, '%P', 2))
+		self.month = tk.Entry(self, width=3, justify='center', validate='key', validatecommand=(id, '%P', 2))
+		self.year = tk.Entry(self, width=5, justify='center', validate='key', validatecommand=(id, '%P', 4))
 
-		# trace variables to limit chars
-		self.day.trace('w', lambda *args :DateEntry.limit_entry(self.day))
-		self.month.trace('w', lambda *args :DateEntry.limit_entry(self.month))
-		self.year.trace('w', lambda *args :DateEntry.limit_entry(self.year, limit=4))
+		# create today button
+		self.today = tk.Button(self, text='Today', command=self.set_to_today)
 
 		# pack
-		day_box.grid()
-		month_box.grid(row=0, column=1)
-		year_box.grid(row=0, column=2)
+		self.day.grid()
+		tk.Label(self, text='.').grid(row=0, column=1)
+		self.month.grid(row=0, column=2)
+		tk.Label(self, text='.').grid(row=0, column=3)
+		self.year.grid(row=0, column=4)
+		self.today.grid(row=0, column=5)
 
 
-	def limit_entry(var, limit=2):
+	def validate_entry(self, P, limit):
 		"""
-		Used to limit entry boxes to a certain length
-		limit defaults to 2
+		Checks entered character is a number, and that entry is less
+		than limit length
 		"""
-		var.set(var.get()[:limit])
+		# check for length
+		if len(P) > int(limit):
+			return False
+		elif len(P) == 0:
+			return True
 
+		# check for type
+		try:
+			int(P)
+			return True
+		except ValueError:
+			return False
+
+
+	def set_to_today(self):
+		"""
+		Changes the entry boxes to show today's date
+		"""
+		# setup variables
+		boxes = [self.day, self.month, self.year]
+		contents = datetime.date.today().strftime('%d %m %Y').split()
+		# dynamically clear and enter contents
+		for i in range(3):
+			boxes[i].delete(0, 'end')
+			boxes[i].insert(0, contents[i])
+
+
+	def get_date(self):
+		"""
+		Retrieves date from entry boxes
+		Returns tuple (True/False, datetime object/error message)
+		"""
+		try:
+			date = datetime.date(year=int(self.year.get()),
+								 month=int(self.month.get()),
+								 day=int(self.day.get()))
+			return True, date
+		except ValueError as err:
+			return False, err
 
 
 root = tk.Tk()
 date = DateEntry(root)
 date.pack()
+
+# button to test retrieval
+test = tk.Button(root, text='Get Date', command=date.get_date)
+test.pack()
+
 
 root.mainloop()
