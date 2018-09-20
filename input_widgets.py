@@ -11,7 +11,7 @@ class DateEntry(tk.Frame):
 	"""
 	Allows the user to enter a date
 	"""
-	def __init__(self, parent):
+	def __init__(self, parent, today_button=True):
 		tk.Frame.__init__(self, parent)
 
 		# register validation command
@@ -23,7 +23,9 @@ class DateEntry(tk.Frame):
 		self.year = tk.Entry(self, width=5, justify='center', validate='key', validatecommand=(id, '%P', 4))
 
 		# create today button
-		self.today = tk.Button(self, text='Today', command=self.set_to_today)
+		if today_button:
+			self.today = tk.Button(self, text='Today', command=self.set_to_today)
+			self.today.grid(row=0, column=5)
 
 		# pack
 		self.day.grid()
@@ -31,7 +33,6 @@ class DateEntry(tk.Frame):
 		self.month.grid(row=0, column=2)
 		tk.Label(self, text='.').grid(row=0, column=3)
 		self.year.grid(row=0, column=4)
-		self.today.grid(row=0, column=5)
 
 
 	def validate_entry(self, P, limit):
