@@ -87,17 +87,30 @@ class DateEntry(tk.Frame):
 			return False, err
 
 
-root = tk.Tk()
-widget = DateEntry(root)
-widget.pack()
+class AmtEntry(tk.Frame):
+	"""
+	Custom widget for entering an amount of money
+	"""
+	def __init__(self, parent):
+		tk.Frame.__init__(self, parent)
+		self.parent = parent
 
-# button to test retrieval
-# TODO: 
-test = tk.Button(root, text='Get Date', command=lambda: print(widget.get_date()))
-test.pack()
+		# create entry boxes
+		self.pounds = tk.Entry(self)
+		self.pence = tk.Entry(self)
 
-test2 = tk.Button(root, text='Test entry box', command=lambda: print(widget.year.get()))
-test2.pack()
+		# grid
+		tk.Label(self, text='£').grid(row=0, column=0)
+		self.pounds.grid(row=0, column=1)
+		tk.Label(self, text='.').grid(row=0, column=2)
+		self.pence.grid(row=0, column=3)
 
 
-root.mainloop()
+# TESTING
+if __name__ == "__main__":
+	root = tk.Tk()
+
+	test = AmtEntry(root)
+	test.pack()
+
+	root.mainloop()
