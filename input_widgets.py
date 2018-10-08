@@ -13,14 +13,15 @@ class DateEntry(tk.Frame):
 	"""
 	def __init__(self, parent, today_button=True):
 		tk.Frame.__init__(self, parent)
+		self.parent = parent
 
 		# register validation command
-		id = parent.register(self.validate_entry)
+		id = self.parent.register(self.validate_date_entry)
 
 		# create entry boxes
-		self.day = tk.Entry(self, width=3, justify='center', validate='key', validatecommand=(id, '%P', 2))
-		self.month = tk.Entry(self, width=3, justify='center', validate='key', validatecommand=(id, '%P', 2))
-		self.year = tk.Entry(self, width=5, justify='center', validate='key', validatecommand=(id, '%P', 4))
+		self.day = tk.Entry(self, width=3, justify='center', validate='key', validatecommand=(id, '%P', 2, 31))
+		self.month = tk.Entry(self, width=3, justify='center', validate='key', validatecommand=(id, '%P', 2, 12))
+		self.year = tk.Entry(self, width=5, justify='center', validate='key', validatecommand=(id, '%P', 4, float('inf')))
 
 		# create today button
 		if today_button:
@@ -28,17 +29,17 @@ class DateEntry(tk.Frame):
 			self.today.grid(row=0, column=5)
 
 		# pack
-		self.day.grid()
+		self.day.grid(row=0, column=0)
 		tk.Label(self, text='.').grid(row=0, column=1)
 		self.month.grid(row=0, column=2)
 		tk.Label(self, text='.').grid(row=0, column=3)
 		self.year.grid(row=0, column=4)
 
 
-	def validate_entry(self, P, limit):
+	def validate_date_entry(self, P, limit, top_value):
 		"""
 		Checks entered character is a number, and that entry is less
-		than limit length
+		than limit length and the top value
 		"""
 		# check for length
 		if len(P) > int(limit):
@@ -48,9 +49,14 @@ class DateEntry(tk.Frame):
 
 		# check for type
 		try:
-			int(P)
-			return True
+			value = int(P)
 		except ValueError:
+			return False
+
+		# check the entered number isn't higher than top_value
+		if value <= int(top_value):
+			return True
+		else:
 			return False
 
 
@@ -82,12 +88,16 @@ class DateEntry(tk.Frame):
 
 
 root = tk.Tk()
-date = DateEntry(root)
-date.pack()
+widget = DateEntry(root)
+widget.pack()
 
 # button to test retrieval
-test = tk.Button(root, text='Get Date', command=date.get_date)
+# TODO: 
+test = tk.Button(root, text='Get Date', command=lambda: print(widget.get_date()))
 test.pack()
+
+test2 = tk.Button(root, text='Test entry box', command=lambda: print(widget.year.get()))
+test2.pack()
 
 
 root.mainloop()
